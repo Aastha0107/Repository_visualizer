@@ -245,13 +245,28 @@ def analyze_directory(root_path: str) -> RepoGraph:
 
 def graph_to_dict(graph: RepoGraph) -> dict:
     """Serialise the graph, stripping abs_path from nodes."""
+
     nodes_out = []
+
     for n in graph.nodes:
         d = asdict(n)
-        d.pop("abs_path", None)  #
+        d.pop("abs_path", None)
         nodes_out.append(d)
+
+    languages = {}
+
+    for node in graph.nodes:
+        ext = node.extension
+        languages[ext] = languages.get(ext, 0) + 1
+
     return {
         "root": graph.root,
         "nodes": nodes_out,
         "edges": [asdict(e) for e in graph.edges],
+
+        "stats": {
+            "total_files": len(graph.nodes),
+            "total_dependencies": len(graph.edges),
+            "languages": languages
+        }
     }
