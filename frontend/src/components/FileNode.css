@@ -1,0 +1,107 @@
+/* FileNode.css */
+.file-node {
+  background: #1a1a2e;
+  border: 1.5px solid #2d2d44;
+  border-radius: 10px;
+  padding: 10px 14px;
+  min-width: 180px;
+  max-width: 240px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.file-node:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+  transform: translateY(-1px);
+}
+
+.file-node--selected {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 40%, transparent) !important;
+}
+
+/* Header: ext badge + filename */
+.fn-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.fn-ext-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #fff;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.fn-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e2e2f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Meta row: LOC + complexity pill */
+.fn-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.fn-stat {
+  font-size: 11px;
+  color: #8888aa;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fn-stat-icon {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.fn-complexity {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+
+.badge-green  { background: #14532d; color: #4ade80; }
+.badge-yellow { background: #713f12; color: #facc15; }
+.badge-orange { background: #7c2d12; color: #fb923c; }
+.badge-red    { background: #450a0a; color: #f87171; }
+
+/* Complexity bar */
+.fn-bar-bg {
+  height: 3px;
+  background: #2d2d44;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.fn-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+/* React Flow handles */
+.react-flow__handle {
+  width: 8px !important;
+  height: 8px !important;
+  background: var(--accent) !important;
+  border: 2px solid #1a1a2e !important;
+}
