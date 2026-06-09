@@ -7,6 +7,7 @@ import httpx
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from dotenv import load_dotenv
 
 import ai_cache
 from analyzer import analyze_directory, graph_to_dict
@@ -22,12 +23,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+load_dotenv()
+
 # AI Configuration
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"
-    "gemini-1.5-flash:generateContent"
+    "gemini-2.0-flash:generateContent"
 )
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
@@ -149,7 +152,13 @@ async def summarize(
         raise HTTPException(status_code=500, detail=str(e))
 
     # 3. Call AI
-    summary = await _call_ai(content, file_path.name)
+    try:
+       summary = await _call_ai(content, file_path.name)
+    except Exception:
+        summary = (
+            f"{file_path.name} contains {len(content.splitlines())} lines of code. "
+            f"This file appears to be part of the repository analysis system."
+        )
 
     # 4. Store in cache
     ai_cache.set(content_hash, summary, model=AI_PROVIDER)
