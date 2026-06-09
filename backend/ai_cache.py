@@ -44,4 +44,9 @@ def invalidate(content_hash: str) -> None:
 
 def stats() -> dict:
     data = _load()
-    return {"cached_entries": len(data)}
+
+    return {
+        "cached_entries": len(data),
+        "cache_enabled": True,
+        "cache_file": str(CACHE_FILE)
+    }
