@@ -1,15 +1,3 @@
-"""
-analyzer.py
------------
-Core engine that walks a directory, parses files for imports/dependencies,
-and computes basic metrics (Lines of Code, complexity estimate).
-
-Supported dependency detection:
-  - Python  : import X / from X import Y
-  - JS/TS   : import ... from '...' / require('...')
-  - C/C++   : #include "..." / #include <...>
-"""
-
 import os
 import re
 import hashlib
@@ -17,45 +5,58 @@ from pathlib import Path
 from dataclasses import dataclass, field, asdict
 from typing import Optional
 
-# ---------- configuration ----------
+#Configuration
 
 SUPPORTED_EXTENSIONS = {
     ".py", ".js", ".ts", ".jsx", ".tsx",
     ".c", ".cpp", ".h", ".hpp",
-    ".java", ".go", ".rs",
+    ".java",".go",".rs",".php",
+    ".cs",".swift",".kt",".dart"
 }
 
 IGNORE_DIRS = {
-    "node_modules", ".git", "__pycache__", ".venv",
-    "venv", "dist", "build", ".next", "coverage",
+    "node_modules",
+    ".git",
+    "__pycache__",
+    ".venv",
+    "venv",
+    "dist",
+    "build",
+    ".next",
+    "coverage",
+    ".idea",
+    ".vscode",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".cache"
 }
 
-MAX_FILE_SIZE_BYTES = 512 * 1024  # 512 KB – skip huge generated files
+MAX_FILE_SIZE_BYTES = 512 * 1024  
 
 
-# ---------- data classes ----------
+# Data Classes
 
 @dataclass
 class FileNode:
-    id: str                          # unique: relative path
-    label: str                       # filename only
-    path: str                        # relative path from root
-    abs_path: str                    # absolute path (not sent to frontend)
+    id: str                          
+    label: str                     
+    path: str                       
+    abs_path: str                   
     extension: str
     lines_of_code: int
     blank_lines: int
-    complexity: int                  # rough cyclomatic proxy
+    complexity: int                  
     size_bytes: int
-    content_hash: str                # sha256 of file content (for AI cache)
-    raw_imports: list[str] = field(default_factory=list)   # raw import strings
-    dependencies: list[str] = field(default_factory=list)  # resolved node IDs
+    content_hash: str               
+    raw_imports: list[str] = field(default_factory=list)   
+    dependencies: list[str] = field(default_factory=list) 
 
 
 @dataclass
 class DependencyEdge:
     id: str
-    source: str   # node id
-    target: str   # node id
+    source: str   
+    target: str   
 
 
 @dataclass
@@ -65,7 +66,7 @@ class RepoGraph:
     root: str
 
 
-# ---------- helpers ----------
+# Helpers
 
 def _hash_content(content: str) -> str:
     return hashlib.sha256(content.encode()).hexdigest()[:16]
@@ -100,10 +101,10 @@ def _parse_python_imports(content: str) -> list[str]:
 
 def _parse_js_imports(content: str) -> list[str]:
     imports = []
-    # ES6 imports:  import X from './foo'
+    
     for m in re.finditer(r'import\s+.*?\s+from\s+[\'"]([^\'"]+)[\'"]', content):
         imports.append(m.group(1))
-    # CommonJS: require('./foo')
+    
     for m in re.finditer(r'require\s*\(\s*[\'"]([^\'"]+)[\'"]\s*\)', content):
         imports.append(m.group(1))
     return imports
@@ -137,7 +138,7 @@ def _resolve_dependencies(node: FileNode, id_map: dict[str, str]) -> list[str]:
     node_dir = str(Path(node.path).parent)
 
     for raw in node.raw_imports:
-        # ---- relative JS/TS path (starts with . or ..) ----
+     
         if raw.startswith(".") and ext in {".js", ".ts", ".jsx", ".tsx"}:
             candidate_base = str(
                 (Path(node_dir) / raw).as_posix()
@@ -150,7 +151,7 @@ def _resolve_dependencies(node: FileNode, id_map: dict[str, str]) -> list[str]:
                     break
             continue
 
-        # ---- Python: match stem ----
+      
         if ext == ".py":
             for file_id, file_path in id_map.items():
                 stem = Path(file_path).stem
@@ -159,7 +160,7 @@ def _resolve_dependencies(node: FileNode, id_map: dict[str, str]) -> list[str]:
                     break
             continue
 
-        # ---- C/C++: match filename ----
+    
         if ext in {".c", ".cpp", ".h", ".hpp"}:
             target_name = Path(raw).name
             for file_id, file_path in id_map.items():
@@ -167,10 +168,10 @@ def _resolve_dependencies(node: FileNode, id_map: dict[str, str]) -> list[str]:
                     resolved.append(file_id)
                     break
 
-    return list(set(resolved))  # deduplicate
+    return list(set(resolved))  
 
 
-# ---------- main traversal ----------
+# Main Traverdsal
 
 def analyze_directory(root_path: str) -> RepoGraph:
     root = Path(root_path).resolve()
@@ -178,12 +179,12 @@ def analyze_directory(root_path: str) -> RepoGraph:
         raise ValueError(f"Not a directory: {root_path}")
 
     nodes: list[FileNode] = []
-    # id_map: relative_path -> node id (same thing, but kept for clarity)
+   
     id_map: dict[str, str] = {}
 
     # Pass 1: collect all files
     for dirpath, dirnames, filenames in os.walk(root):
-        # prune ignored dirs in-place
+    
         dirnames[:] = [d for d in dirnames if d not in IGNORE_DIRS]
 
         for filename in filenames:
@@ -196,7 +197,7 @@ def analyze_directory(root_path: str) -> RepoGraph:
                 continue
 
             rel_path = str(abs_path.relative_to(root)).replace("\\", "/")
-            node_id = rel_path  # use relative path as stable ID
+            node_id = rel_path  
 
             try:
                 content = abs_path.read_text(encoding="utf-8", errors="ignore")
@@ -247,7 +248,7 @@ def graph_to_dict(graph: RepoGraph) -> dict:
     nodes_out = []
     for n in graph.nodes:
         d = asdict(n)
-        d.pop("abs_path", None)  # never expose server filesystem paths
+        d.pop("abs_path", None)  #
         nodes_out.append(d)
     return {
         "root": graph.root,

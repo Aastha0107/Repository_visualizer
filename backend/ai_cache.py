@@ -1,14 +1,3 @@
-"""
-ai_cache.py
------------
-Persistent JSON cache for AI-generated file summaries.
-Key   = content_hash (first 16 chars of sha256)
-Value = { "summary": str, "model": str, "timestamp": float }
-
-The cache lives at  backend/cache/ai_summaries.json
-(created automatically on first use).
-"""
-
 import json
 import time
 from pathlib import Path

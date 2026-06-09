@@ -1,16 +1,3 @@
-"""
-main.py  –  FastAPI backend
----------------------------
-Endpoints:
-  POST /api/analyze          { "path": "/abs/path/to/repo" }
-  GET  /api/summarize/{node_id}?root=...&hash=...
-  GET  /api/cache/stats
-  GET  /health
-
-Run with:
-  uvicorn main:app --reload --port 8000
-"""
-
 import os
 import re
 from pathlib import Path
@@ -24,9 +11,7 @@ from pydantic import BaseModel
 import ai_cache
 from analyzer import analyze_directory, graph_to_dict
 
-# ------------------------------------------------------------------ #
-#  App setup
-# ------------------------------------------------------------------ #
+# Apps Setup
 
 app = FastAPI(title="Repo Analyzer API", version="1.0.0")
 
@@ -37,9 +22,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ------------------------------------------------------------------ #
-#  AI configuration  (set your key in environment or .env)
-# ------------------------------------------------------------------ #
+# AI Configuration
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_URL = (
@@ -49,21 +32,16 @@ GEMINI_URL = (
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
-# Which provider to use: "gemini" | "openai"
 AI_PROVIDER = os.getenv("AI_PROVIDER", "gemini")
 
 
-# ------------------------------------------------------------------ #
-#  Request / Response models
-# ------------------------------------------------------------------ #
+# Request/Response Models
 
 class AnalyzeRequest(BaseModel):
     path: str
 
 
-# ------------------------------------------------------------------ #
-#  Helper: call AI
-# ------------------------------------------------------------------ #
+# Helper
 
 async def _call_ai(file_content: str, filename: str) -> str:
     prompt = (
@@ -78,7 +56,7 @@ async def _call_ai(file_content: str, filename: str) -> str:
     elif GEMINI_API_KEY:
         return await _call_gemini(prompt)
     else:
-        return "⚠️ No AI API key configured. Set GEMINI_API_KEY or OPENAI_API_KEY in your environment."
+        return " No AI API key configured. Set GEMINI_API_KEY or OPENAI_API_KEY in your environment."
 
 
 async def _call_gemini(prompt: str) -> str:
@@ -121,9 +99,7 @@ async def _call_openai(prompt: str) -> str:
     return r.json()["choices"][0]["message"]["content"].strip()
 
 
-# ------------------------------------------------------------------ #
-#  Endpoints
-# ------------------------------------------------------------------ #
+# Endpoints
 
 @app.get("/health")
 def health():
@@ -132,10 +108,7 @@ def health():
 
 @app.post("/api/analyze")
 def analyze(req: AnalyzeRequest):
-    """
-    Walk a local directory and return the dependency graph as JSON.
-    { nodes: [...], edges: [...], root: str }
-    """
+   
     path = req.path.strip()
     if not path:
         raise HTTPException(status_code=400, detail="path is required")
@@ -156,10 +129,7 @@ async def summarize(
     root: str = Query(..., description="Absolute path to the repo root"),
     hash: str = Query(..., description="content_hash from the node object"),
 ):
-    """
-    Return an AI-generated plain-English summary for a file.
-    Uses a persistent cache keyed by content_hash.
-    """
+   
     node_id = unquote(node_id)
     content_hash = hash
 
