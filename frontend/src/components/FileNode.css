@@ -1,107 +1,140 @@
-/* FileNode.css */
+/* ==========================================================================
+   FileNode — custom React Flow node card
+   Accent color is injected per file type via --accent-file.
+   ========================================================================== */
+
 .file-node {
-  background: #1a1a2e;
-  border: 1.5px solid #2d2d44;
-  border-radius: 10px;
-  padding: 10px 14px;
-  min-width: 180px;
-  max-width: 240px;
+  position: relative;
+  padding: var(--sp-3);
+  font-family: var(--font-sans);
+  background: linear-gradient(180deg, var(--surface-3), var(--surface-2));
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast), transform var(--t-fast);
+}
+
+/* file-type accent strip */
+.file-node::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 0;
+  width: 3px;
+  background: var(--accent-file);
+  border-radius: 0 2px 2px 0;
+  opacity: 0.9;
 }
 
 .file-node:hover {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
 
-.file-node--selected {
-  border-color: var(--accent) !important;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 40%, transparent) !important;
+.file-node--selected,
+.file-node--selected:hover {
+  border-color: var(--accent-border);
+  box-shadow: var(--glow-accent);
 }
 
-/* Header: ext badge + filename */
+/* ---- Handles ---- */
+
+.file-node .react-flow__handle {
+  width: 7px;
+  height: 7px;
+  background: var(--border-strong);
+  border: 1px solid var(--bg-canvas);
+}
+
+.file-node--selected .react-flow__handle {
+  background: var(--accent);
+}
+
+/* ---- Header ---- */
+
 .fn-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: var(--sp-2);
+  min-width: 0;
 }
 
 .fn-ext-badge {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  padding: 2px 6px;
-  border-radius: 4px;
-  color: #fff;
   flex-shrink: 0;
-  text-transform: uppercase;
+  padding: 1px 6px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--accent-file);
+  background: color-mix(in srgb, var(--accent-file) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-file) 35%, transparent);
+  border-radius: var(--r-sm);
 }
 
 .fn-name {
-  font-size: 12px;
-  font-weight: 600;
-  color: #e2e2f0;
-  white-space: nowrap;
   overflow: hidden;
+  font-size: var(--fs-base);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--text-1);
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* Meta row: LOC + complexity pill */
+/* ---- Metadata row ---- */
+
 .fn-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 6px;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
 }
 
 .fn-stat {
-  font-size: 11px;
-  color: #8888aa;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--sp-1);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-2);
 }
 
 .fn-stat-icon {
-  font-size: 13px;
-  opacity: 0.7;
+  width: 11px;
+  height: 11px;
+  color: var(--text-3);
 }
 
 .fn-complexity {
-  font-size: 10px;
+  font-size: var(--fs-xs);
   font-weight: 600;
-  padding: 2px 7px;
-  border-radius: 20px;
+  letter-spacing: 0.02em;
 }
 
-.badge-green  { background: #14532d; color: #4ade80; }
-.badge-yellow { background: #713f12; color: #facc15; }
-.badge-orange { background: #7c2d12; color: #fb923c; }
-.badge-red    { background: #450a0a; color: #f87171; }
+.badge-green  { color: var(--green); }
+.badge-yellow { color: var(--yellow); }
+.badge-orange { color: var(--orange); }
+.badge-red    { color: var(--red); }
 
-/* Complexity bar */
+/* ---- Complexity bar ---- */
+
 .fn-bar-bg {
   height: 3px;
-  background: #2d2d44;
-  border-radius: 2px;
+  margin-top: var(--sp-2);
   overflow: hidden;
+  background: var(--border-subtle);
+  border-radius: 999px;
 }
 
 .fn-bar-fill {
   height: 100%;
-  background: var(--accent);
-  border-radius: 2px;
-  transition: width 0.3s;
-}
-
-/* React Flow handles */
-.react-flow__handle {
-  width: 8px !important;
-  height: 8px !important;
-  background: var(--accent) !important;
-  border: 2px solid #1a1a2e !important;
+  background: linear-gradient(90deg, var(--green), var(--yellow) 45%, var(--orange) 72%, var(--red));
+  border-radius: 999px;
+  transition: width var(--t-med);
 }

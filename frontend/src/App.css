@@ -1,84 +1,188 @@
-/* App.css – global layout and reset */
+/* ==========================================================================
+   RepoViz — Design System & App Shell
+   --------------------------------------------------------------------------
+   Single source of truth for the visual language. Every component stylesheet
+   consumes these tokens; no component defines its own raw colors.
+   Inspired by GitHub / Linear / Vercel dark interfaces.
+   ========================================================================== */
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+:root {
+  /* ---- Surfaces ---- */
+  --bg:            #0a0c10;   /* app background          */
+  --bg-canvas:     #0d1017;   /* graph workspace         */
+  --surface-1:     #11151c;   /* panels, toolbar         */
+  --surface-2:     #161b24;   /* cards, inputs           */
+  --surface-3:     #1c2230;   /* hover / raised          */
+
+  /* ---- Borders ---- */
+  --border-subtle: #1d242f;
+  --border:        #262e3b;
+  --border-strong: #344052;
+
+  /* ---- Text ---- */
+  --text-1:        #e8ecf2;   /* primary                 */
+  --text-2:        #9aa6b5;   /* secondary               */
+  --text-3:        #5e6a7a;   /* tertiary / hints        */
+
+  /* ---- Brand & semantic ---- */
+  --accent:        #6e7ef7;
+  --accent-hover:  #8190ff;
+  --accent-muted:  rgba(110, 126, 247, 0.14);
+  --accent-border: rgba(110, 126, 247, 0.45);
+
+  --green:         #3fb950;
+  --yellow:        #d29922;
+  --orange:        #f0883e;
+  --red:           #f85149;
+  --red-muted:     rgba(248, 81, 73, 0.12);
+  --red-border:    rgba(248, 81, 73, 0.4);
+
+  /* ---- Typography ---- */
+  --font-sans: "Inter", -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  --fs-xs:   0.6875rem;  /* 11px — labels, badges      */
+  --fs-sm:   0.75rem;    /* 12px — metadata, captions  */
+  --fs-base: 0.8125rem;  /* 13px — body, inputs        */
+  --fs-md:   0.875rem;   /* 14px — emphasized body     */
+  --fs-lg:   1rem;       /* 16px — section titles      */
+  --fs-xl:   1.25rem;    /* 20px — page headings       */
+
+  /* ---- Spacing scale ---- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  /* ---- Radii ---- */
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 10px;
+  --r-xl: 14px;
+
+  /* ---- Elevation ---- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+  --glow-accent: 0 0 0 1px var(--accent-border), 0 4px 16px rgba(110, 126, 247, 0.25);
+
+  /* ---- Motion ---- */
+  --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --t-fast: 120ms var(--ease);
+  --t-med:  200ms var(--ease);
 }
 
-html, body, #root {
-  height: 100%;
-  background: #0d0d18;
-  color: #e2e2f0;
-  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-}
+/* ---- App shell ---- */
 
-/* Main layout: toolbar on top, canvas + sidebar below */
 .app-layout {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  overflow: hidden;
+  height: 100dvh;
+  background: var(--bg);
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
 .main-area {
   display: flex;
   flex: 1;
-  overflow: hidden;
+  min-height: 0;
 }
 
 .canvas-area {
-  flex: 1;
   position: relative;
-  overflow: hidden;
-  background: #0d0d18;
+  flex: 1;
+  min-width: 0;
+  background: var(--bg-canvas);
 }
 
-/* Error banner */
+/* ---- Error banner ---- */
+
 .error-banner {
   position: absolute;
-  top: 16px;
+  top: var(--sp-4);
   left: 50%;
   transform: translateX(-50%);
-  background: #2a1010;
-  border: 1px solid #7f1d1d;
-  color: #fca5a5;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 13px;
   z-index: 20;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  max-width: min(520px, calc(100% - var(--sp-6)));
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--surface-2);
+  border: 1px solid var(--red-border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  animation: slide-down 240ms var(--ease);
 }
 
-/* Loading overlay */
+.error-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--red);
+}
+
+.error-title {
+  font-size: var(--fs-base);
+  font-weight: 600;
+  color: var(--text-1);
+}
+
+.error-message {
+  margin-top: 2px;
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+  word-break: break-word;
+}
+
+/* ---- Loading overlay ---- */
+
 .loading-overlay {
   position: absolute;
   inset: 0;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  background: rgba(13,13,24,0.85);
-  z-index: 20;
-}
-
-.loading-overlay p {
-  color: #8888aa;
-  font-size: 14px;
+  gap: var(--sp-2);
+  background: var(--bg-canvas);
 }
 
 .spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid #2d2d44;
-  border-top-color: #6366f1;
+  width: 28px;
+  height: 28px;
+  margin-bottom: var(--sp-3);
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+.loading-title {
+  margin: 0;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--text-1);
+}
 
-/* Empty state */
+.loading-sub {
+  margin: 0;
+  font-size: var(--fs-sm);
+  color: var(--text-3);
+}
+
+/* ---- Empty state ---- */
+
 .empty-state {
   position: absolute;
   inset: 0;
@@ -86,31 +190,122 @@ html, body, #root {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  color: #4a4a6a;
-  user-select: none;
+  text-align: center;
+  padding: var(--sp-5);
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 40%, rgba(110, 126, 247, 0.06), transparent),
+    var(--bg-canvas);
 }
 
 .empty-icon {
-  font-size: 64px;
-  color: #2d2d44;
+  width: 64px;
+  height: 64px;
+  margin-bottom: var(--sp-4);
+  color: var(--text-3);
+  opacity: 0.9;
+}
+
+.empty-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .empty-state h2 {
-  font-size: 20px;
-  color: #6666aa;
+  margin: 0 0 var(--sp-2);
+  font-size: var(--fs-lg);
   font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-1);
 }
 
 .empty-state p {
-  font-size: 14px;
-  color: #4a4a6a;
+  margin: 0;
+  max-width: 360px;
+  font-size: var(--fs-base);
+  color: var(--text-2);
 }
 
-.empty-state strong { color: #8888aa; }
+.empty-state kbd {
+  padding: 1px 6px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-1);
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: var(--r-sm);
+}
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #12121a; }
-::-webkit-scrollbar-thumb { background: #2d2d44; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #3d3d5a; }
+/* ---- React Flow chrome overrides ---- */
+
+.react-flow__controls {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md);
+}
+
+.react-flow__controls-button {
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background var(--t-fast);
+}
+
+.react-flow__controls-button:last-child {
+  border-bottom: none;
+}
+
+.react-flow__controls-button:hover {
+  background: var(--surface-3);
+}
+
+.react-flow__controls-button svg {
+  fill: var(--text-2);
+}
+
+.react-flow__minimap {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md);
+}
+
+.react-flow__attribution {
+  display: none;
+}
+
+/* ---- Animations ---- */
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translate(-50%, -8px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* ---- Responsive ---- */
+
+@media (max-width: 860px) {
+  .main-area {
+    flex-direction: column;
+  }
+}

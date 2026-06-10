@@ -1,106 +1,214 @@
-/* Toolbar.css */
+/* ==========================================================================
+   Toolbar — premium top bar
+   ========================================================================== */
+
 .toolbar {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 10px 20px;
-  background: #0d0d18;
-  border-bottom: 1px solid #2d2d44;
-  z-index: 10;
+  gap: var(--sp-5);
   flex-shrink: 0;
+  height: 56px;
+  padding: 0 var(--sp-4);
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--border-subtle);
 }
+
+/* ---- Brand ---- */
 
 .tb-brand {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--sp-2);
   flex-shrink: 0;
 }
 
 .tb-logo {
-  font-size: 22px;
-  color: #6366f1;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: var(--accent);
+  background: var(--accent-muted);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--r-md);
+}
+
+.tb-logo svg {
+  width: 17px;
+  height: 17px;
 }
 
 .tb-title {
-  font-size: 18px;
-  font-weight: 800;
-  color: #e2e2f0;
-  letter-spacing: -0.02em;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  display: flex;
+  flex-direction: column;
+  font-size: var(--fs-md);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: var(--text-1);
 }
 
-/* Form */
+.tb-subtitle {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--text-3);
+}
+
+/* ---- Path form ---- */
+
 .tb-form {
   display: flex;
+  gap: var(--sp-2);
   flex: 1;
-  gap: 8px;
-  max-width: 680px;
+  max-width: 640px;
+}
+
+.tb-input-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.tb-input-icon {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  width: 14px;
+  height: 14px;
+  transform: translateY(-50%);
+  color: var(--text-3);
+  pointer-events: none;
 }
 
 .tb-input {
-  flex: 1;
-  background: #1a1a2e;
-  border: 1.5px solid #2d2d44;
-  border-radius: 8px;
-  color: #e2e2f0;
-  font-size: 13px;
-  padding: 8px 14px;
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  width: 100%;
+  height: 34px;
+  padding: 0 var(--sp-3) 0 32px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--text-1);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
 }
 
-.tb-input::placeholder { color: #4a4a6a; }
-.tb-input:focus { border-color: #6366f1; }
-.tb-input:disabled { opacity: 0.5; }
+.tb-input::placeholder {
+  color: var(--text-3);
+}
+
+.tb-input:hover:not(:disabled) {
+  border-color: var(--border-strong);
+}
+
+.tb-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-muted);
+}
+
+.tb-input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ---- Analyze button ---- */
 
 .tb-btn {
-  background: #6366f1;
-  border: none;
-  border-radius: 8px;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 8px 20px;
-  cursor: pointer;
-  white-space: nowrap;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  transition: background 0.15s, opacity 0.15s;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  gap: var(--sp-2);
+  flex-shrink: 0;
+  height: 34px;
+  padding: 0 var(--sp-4);
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(180deg, var(--accent-hover), var(--accent));
+  border: 1px solid var(--accent-border);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: filter var(--t-fast), box-shadow var(--t-fast), transform var(--t-fast);
 }
 
-.tb-btn:hover:not(:disabled) { background: #4f52d6; }
-.tb-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.tb-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+  box-shadow: 0 2px 12px rgba(110, 126, 247, 0.35);
+}
+
+.tb-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.tb-btn:focus-visible {
+  outline: 2px solid var(--accent-hover);
+  outline-offset: 2px;
+}
+
+.tb-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tb-btn-icon {
+  width: 13px;
+  height: 13px;
+}
 
 .tb-spinner {
-  width: 12px;
-  height: 12px;
-  border: 2px solid rgba(255,255,255,0.3);
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
   border-top-color: #fff;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
-  display: inline-block;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+/* ---- Stats ---- */
 
-/* Stats */
 .tb-stats {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--sp-2);
+  margin-left: auto;
   flex-shrink: 0;
 }
 
 .tb-stat {
-  font-size: 12px;
-  color: #8888aa;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  padding: 3px 10px;
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  animation: fade-in var(--t-med);
 }
 
-.tb-stat b { color: #a5b4fc; }
+.tb-stat b {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-1);
+}
 
-.tb-divider { color: #3d3d5a; }
+/* ---- Responsive ---- */
+
+@media (max-width: 720px) {
+  .toolbar {
+    flex-wrap: wrap;
+    height: auto;
+    gap: var(--sp-3);
+    padding: var(--sp-3) var(--sp-4);
+  }
+
+  .tb-form {
+    order: 3;
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  .tb-subtitle {
+    display: none;
+  }
+}

@@ -58,8 +58,8 @@ export default function GraphCanvas({ graphData, onNodeClick, selectedNodeId }) 
     () =>
       edges.map((e) => ({
         ...e,
-        style: { stroke: "#6366f1", strokeWidth: 1.5 },
-        markerEnd: { type: MarkerType.ArrowClosed, color: "#6366f1" },
+        style: { stroke: "rgba(110, 126, 247, 0.55)", strokeWidth: 1.5 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: "#6e7ef7", width: 16, height: 16 },
         animated: false,
       })),
     [edges]
@@ -79,15 +79,18 @@ export default function GraphCanvas({ graphData, onNodeClick, selectedNodeId }) 
       maxZoom={2}
       proOptions={{ hideAttribution: true }}
     >
-      <Background color="#1e1e2e" gap={20} size={1} />
-      <Controls position="bottom-right" />
+      <Background color="#2a3344" gap={24} size={1.25} />
+      <Controls position="bottom-right" showInteractive={false} />
       <MiniMap
         nodeColor={(n) => {
           const ext = n.data?.raw?.extension ?? "";
-          return EXT_COLOR[ext] ?? "#6366f1";
+          return EXT_COLOR[ext] ?? "#6e7ef7";
         }}
-        maskColor="rgba(15,15,25,0.8)"
-        style={{ background: "#12121a" }}
+        nodeStrokeWidth={0}
+        maskColor="rgba(10, 12, 16, 0.82)"
+        style={{ background: "#11151c", width: 180, height: 120 }}
+        pannable
+        zoomable
       />
     </ReactFlow>
   );
