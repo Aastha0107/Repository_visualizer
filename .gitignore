@@ -12,3 +12,8 @@ venv/
 .venv/
 
 __pycache__/
+backend/venv/
+__pycache__/
+*.pyc
+.env
+backend/cache/*.json
