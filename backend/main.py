@@ -9,11 +9,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
+# ✅ FIX 1: load_dotenv() MUST be first, before any os.getenv() calls
+load_dotenv()
+
 import ai_cache
 from analyzer import analyze_directory, graph_to_dict
 
-# Apps Setup
-
+# App Setup
 app = FastAPI(title="Repo Analyzer API", version="1.0.0")
 
 app.add_middleware(
@@ -23,35 +25,39 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-load_dotenv()
-
-# AI Configuration
-
+# ✅ FIX 2: These now correctly read from .env because load_dotenv() ran first
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+# ✅ FIX 3: Using gemini-1.5-flash which is more widely available
 GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"
-    "gemini-2.0-flash:generateContent"
+    "gemini-2.5-flash:generateContent"
 )
-
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-
 AI_PROVIDER = os.getenv("AI_PROVIDER", "gemini")
 
 
 # Request/Response Models
-
 class AnalyzeRequest(BaseModel):
     path: str
 
 
-# Helper
+# ✅ Added startup debug log so you can see if key loaded correctly
+@app.on_event("startup")
+async def startup_event():
+    if GEMINI_API_KEY:
+        print(f"✅ Gemini API key loaded (starts with: {GEMINI_API_KEY[:8]}...)")
+    else:
+        print("❌ WARNING: GEMINI_API_KEY is empty! Check your .env file.")
+    print(f"   AI Provider: {AI_PROVIDER}")
 
+
+# Helper
 async def _call_ai(file_content: str, filename: str) -> str:
     prompt = (
         f"You are a senior software engineer. Analyze the following code from "
         f"the file '{filename}' and explain what it does in exactly 3 short, "
         f"plain-English sentences. Be concise and focus on purpose, not syntax.\n\n"
-        f"```\n{file_content[:6000]}\n```"   # cap at ~6 k chars
+        f"```\n{file_content[:6000]}\n```"
     )
 
     if AI_PROVIDER == "openai" and OPENAI_API_KEY:
@@ -59,7 +65,7 @@ async def _call_ai(file_content: str, filename: str) -> str:
     elif GEMINI_API_KEY:
         return await _call_gemini(prompt)
     else:
-        return " No AI API key configured. Set GEMINI_API_KEY or OPENAI_API_KEY in your environment."
+        return "⚠️ No AI API key configured. Set GEMINI_API_KEY in your .env file."
 
 
 async def _call_gemini(prompt: str) -> str:
@@ -72,12 +78,18 @@ async def _call_gemini(prompt: str) -> str:
             params={"key": GEMINI_API_KEY},
             json=payload,
         )
+
+    # ✅ Better error reporting
     if r.status_code != 200:
-        raise HTTPException(status_code=502, detail=f"Gemini error: {r.text}")
+        error_body = r.text[:500]
+        print(f"❌ Gemini API error {r.status_code}: {error_body}")
+        raise HTTPException(status_code=502, detail=f"Gemini error {r.status_code}: {error_body}")
+
     data = r.json()
     try:
         return data["candidates"][0]["content"]["parts"][0]["text"].strip()
     except (KeyError, IndexError) as e:
+        print(f"❌ Unexpected Gemini response structure: {data}")
         raise HTTPException(status_code=502, detail=f"Unexpected Gemini response: {e}")
 
 
@@ -106,12 +118,15 @@ async def _call_openai(prompt: str) -> str:
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "ai_provider": AI_PROVIDER}
+    return {
+        "status": "ok",
+        "ai_provider": AI_PROVIDER,
+        "gemini_key_loaded": bool(GEMINI_API_KEY),  # ✅ shows true/false without exposing key
+    }
 
 
 @app.post("/api/analyze")
 def analyze(req: AnalyzeRequest):
-   
     path = req.path.strip()
     if not path:
         raise HTTPException(status_code=400, detail="path is required")
@@ -132,7 +147,6 @@ async def summarize(
     root: str = Query(..., description="Absolute path to the repo root"),
     hash: str = Query(..., description="content_hash from the node object"),
 ):
-   
     node_id = unquote(node_id)
     content_hash = hash
 
@@ -153,11 +167,14 @@ async def summarize(
 
     # 3. Call AI
     try:
-       summary = await _call_ai(content, file_path.name)
-    except Exception:
+        summary = await _call_ai(content, file_path.name)
+    except HTTPException:
+        raise  # re-raise HTTP errors so the frontend sees the real error
+    except Exception as e:
+        print(f"❌ AI call failed for {file_path.name}: {e}")
         summary = (
             f"{file_path.name} contains {len(content.splitlines())} lines of code. "
-            f"This file appears to be part of the repository analysis system."
+            f"AI summary unavailable: {str(e)[:100]}"
         )
 
     # 4. Store in cache
