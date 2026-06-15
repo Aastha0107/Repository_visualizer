@@ -200,5 +200,6 @@ Returns cache status and the number of cached summaries.
 
 ## Authors
 
-Aastha Sharma
-Guni Mishra
+[Aastha Sharma](https://github.com/Aastha0107)
+
+[Guni Mishra](https://github.com/gunimishra273)
