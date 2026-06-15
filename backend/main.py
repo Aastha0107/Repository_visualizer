@@ -9,7 +9,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-# ✅ FIX 1: load_dotenv() MUST be first, before any os.getenv() calls
 load_dotenv()
 
 import ai_cache
@@ -33,9 +32,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ FIX 2: These now correctly read from .env because load_dotenv() ran first
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-# ✅ FIX 3: Using gemini-1.5-flash which is more widely available
 GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/"
     "gemini-2.5-flash:generateContent"
@@ -49,7 +46,6 @@ class AnalyzeRequest(BaseModel):
     path: str
 
 
-# ✅ Added startup debug log so you can see if key loaded correctly
 @app.on_event("startup")
 async def startup_event():
     if GEMINI_API_KEY:
@@ -87,7 +83,6 @@ async def _call_gemini(prompt: str) -> str:
             json=payload,
         )
 
-    # ✅ Better error reporting
     if r.status_code != 200:
         error_body = r.text[:500]
         print(f"❌ Gemini API error {r.status_code}: {error_body}")
@@ -129,7 +124,7 @@ def health():
     return {
         "status": "ok",
         "ai_provider": AI_PROVIDER,
-        "gemini_key_loaded": bool(GEMINI_API_KEY),  # ✅ shows true/false without exposing key
+        "gemini_key_loaded": bool(GEMINI_API_KEY), 
     }
 
 
@@ -158,12 +153,10 @@ async def summarize(
     node_id = unquote(node_id)
     content_hash = hash
 
-    # 1. Check cache first
     cached = ai_cache.get(content_hash)
     if cached:
         return {"summary": cached, "cached": True}
 
-    # 2. Read the file
     file_path = Path(root) / node_id
     if not file_path.exists():
         raise HTTPException(status_code=404, detail=f"File not found: {file_path}")
@@ -173,11 +166,10 @@ async def summarize(
     except OSError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    # 3. Call AI
     try:
         summary = await _call_ai(content, file_path.name)
     except HTTPException:
-        raise  # re-raise HTTP errors so the frontend sees the real error
+        raise  
     except Exception as e:
         print(f"❌ AI call failed for {file_path.name}: {e}")
         summary = (
@@ -185,7 +177,6 @@ async def summarize(
             f"AI summary unavailable: {str(e)[:100]}"
         )
 
-    # 4. Store in cache
     ai_cache.set(content_hash, summary, model=AI_PROVIDER)
 
     return {"summary": summary, "cached": False}

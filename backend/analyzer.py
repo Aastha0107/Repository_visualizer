@@ -5,7 +5,6 @@ from pathlib import Path
 from dataclasses import dataclass, field, asdict
 from typing import Optional
 
-#Configuration
 
 SUPPORTED_EXTENSIONS = {
     ".py", ".js", ".ts", ".jsx", ".tsx",
@@ -34,7 +33,6 @@ IGNORE_DIRS = {
 MAX_FILE_SIZE_BYTES = 512 * 1024  
 
 
-# Data Classes
 
 @dataclass
 class FileNode:
@@ -171,7 +169,7 @@ def _resolve_dependencies(node: FileNode, id_map: dict[str, str]) -> list[str]:
     return list(set(resolved))  
 
 
-# Main Traverdsal
+# Main Traversal
 
 def analyze_directory(root_path: str) -> RepoGraph:
     root = Path(root_path).resolve()
@@ -225,11 +223,9 @@ def analyze_directory(root_path: str) -> RepoGraph:
             nodes.append(node)
             id_map[rel_path] = node_id
 
-    # Pass 2: resolve dependencies to real node IDs
     for node in nodes:
         node.dependencies = _resolve_dependencies(node, id_map)
 
-    # Build edges (deduplicated)
     seen_edges: set[tuple[str, str]] = set()
     edges: list[DependencyEdge] = []
     for node in nodes:
